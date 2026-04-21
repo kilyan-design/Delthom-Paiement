@@ -438,35 +438,35 @@
                         
                         <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Quels sont vos 3 services principaux ?</label>
-                            <input type="text" placeholder="ex: Dépannage urgence, Création SDB, Chauffage..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                            <input type="text" id="services-input" placeholder="ex: Dépannage urgence, Création SDB, Chauffage..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
                         </div>
 
                         <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Sur quelles villes/rayons intervenez-vous ?</label>
-                            <input type="text" placeholder="ex: Toulon et 30km autour" class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                            <input type="text" id="villes-input" placeholder="ex: Toulon et 30km autour" class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
                         </div>
 
                         <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Quelle est votre plus grande force par rapport aux concurrents ?</label>
-                            <input type="text" placeholder="ex: Devis sous 24h, 15 ans d'expérience, Intervention 7j/7..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                            <input type="text" id="force-input" placeholder="ex: Devis sous 24h, 15 ans d'expérience, Intervention 7j/7..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
                         </div>
 
                         <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Avez-vous des certifications ou garanties spécifiques ?</label>
-                            <input type="text" placeholder="ex: RGE, Qualibat, Garantie Décennale à jour..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                            <input type="text" id="certifications-input" placeholder="ex: RGE, Qualibat, Garantie Décennale à jour..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
                         </div>
 
                         <div class="pt-6 border-t border-white/10">
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-3 uppercase tracking-wider">Votre Logo <span class="text-gray-500 font-normal normal-case">(Optionnel)</span></label>
-                            <input type="file" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
+                            <input type="file" id="logo-input" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
                         </div>
 
                         <div>
                             <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-3 uppercase tracking-wider">Photos de vos meilleurs chantiers <span class="text-gray-500 font-normal normal-case">(Optionnel, 3 à 5 max)</span></label>
-                            <input type="file" multiple accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
+                            <input type="file" id="photos-input" multiple accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
                         </div>
 
-                        <button onclick="goToOnboardStep('3')" class="w-full py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-transform mt-8 shadow-[0_0_30px_rgba(59,130,246,0.3)]">VALIDER MON DOSSIER 📤</button>
+                        <button id="btn-valider-dossier" onclick="submitOnboardingData()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-transform mt-8 shadow-[0_0_30px_rgba(59,130,246,0.3)]">VALIDER MON DOSSIER 📤</button>
                     </div>
                 </div>
 
@@ -561,6 +561,8 @@
             if (touchendX > touchstartX + 50) moveCarousel('prev');
         }
 
+        let domaineType = ""; // Permet de mémoriser si c'est un nouveau domaine ou existant
+
         /* --- GESTION DES VUES (NAVIGATION) --- */
         function switchView(viewName) {
             const viewOffres = document.getElementById('view-offres');
@@ -594,6 +596,10 @@
 
         /* --- LOGIQUE ONBOARDING V2 --- */
         function goToOnboardStep(stepId) {
+            // Mémoriser le choix du domaine
+            if (stepId === '1a') domaineType = "Nouveau";
+            if (stepId === '1b') domaineType = "Existant";
+
             // Cacher toutes les étapes
             document.querySelectorAll('.onboard-step').forEach(el => {
                 el.classList.add('hidden');
@@ -613,10 +619,68 @@
             else if(stepId === '3') {
                 progressBar.style.width = '100%';
                 startCountdown();
-                
-                // Ici tu pourras intégrer ton Webhook (Make/Zapier) pour envoyer les données au CRM.
-                // alert('Webhook: Envoi des données en cours...'); 
             }
+        }
+
+        /* --- ENVOI DES DONNÉES PAR EMAIL --- */
+        function submitOnboardingData() {
+            const btn = document.getElementById('btn-valider-dossier');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'ENVOI EN COURS... ⏳';
+            btn.disabled = true;
+
+            // 1. Préparation des données textuelles
+            let infoDomaine = "";
+            if (domaineType === "Nouveau") {
+                infoDomaine = "NOUVEAU DOMAINE À ACHETER : " + document.getElementById('new-domain-input').value;
+            } else if (domaineType === "Existant") {
+                infoDomaine = "DOMAINE EXISTANT : " + document.getElementById('existing-domain-input').value + " (Fournisseur: " + document.getElementById('domain-provider').value + ")";
+            }
+
+            // Utilisation de FormData pour supporter l'envoi de fichiers (images)
+            const formData = new FormData();
+            formData.append("_subject", "🚀 Nouveau Dossier Client : delthom+ !");
+            formData.append("Choix_Domaine", infoDomaine);
+            formData.append("Services_Principaux", document.getElementById('services-input').value);
+            formData.append("Villes_Intervention", document.getElementById('villes-input').value);
+            formData.append("Points_Forts", document.getElementById('force-input').value);
+            formData.append("Certifications", document.getElementById('certifications-input').value);
+            
+            // 2. Ajout des fichiers (Logo et Photos)
+            const logoInput = document.getElementById('logo-input');
+            if (logoInput && logoInput.files.length > 0) formData.append("Logo", logoInput.files[0]);
+            
+            const photosInput = document.getElementById('photos-input');
+            if (photosInput && photosInput.files.length > 0) {
+                for (let i = 0; i < photosInput.files.length; i++) {
+                    formData.append("Photo_Chantier_" + (i+1), photosInput.files[i]);
+                }
+            }
+
+            // Configuration de l'email de réception du formulaire
+            const emailDestination = "contact@delthompro.com"; 
+
+            // 3. Envoi au webhook de FormSubmit
+            fetch("https://formsubmit.co/ajax/" + emailDestination, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Succès de l'envoi
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                goToOnboardStep('3'); // On passe à l'écran de félicitations
+            })
+            .catch(error => {
+                console.error("Erreur d'envoi:", error);
+                alert("L'envoi a échoué. Veuillez réessayer.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                // Note: En phase de test, tu peux décommenter la ligne suivante pour forcer l'étape 3 même en cas d'erreur
+                // goToOnboardStep('3'); 
+            });
         }
 
         function updateProviderInstructions() {
