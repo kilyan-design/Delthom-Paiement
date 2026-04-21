@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>delthom+ | Offres Web & IA</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: '#05000a',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #05000a;
+            color: #f3f4f6;
+            /* Empêche le rebond élastique sur iOS et bloque le scroll horizontal */
+            overscroll-behavior-y: none;
+            overflow-x: hidden;
+        }
+
+        /* Effets de texte néon */
+        .neon-text { text-shadow: 0 0 8px rgba(168, 85, 247, 0.8), 0 0 20px rgba(168, 85, 247, 0.4); }
+        .neon-text-pink { text-shadow: 0 0 8px rgba(236, 72, 153, 0.8), 0 0 20px rgba(236, 72, 153, 0.4); }
+        .neon-text-blue { text-shadow: 0 0 8px rgba(59, 130, 246, 0.8), 0 0 20px rgba(59, 130, 246, 0.4); }
+
+        /* Grille Cyberpunk de fond */
+        .cyber-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(168, 85, 247, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(168, 85, 247, 0.05) 1px, transparent 1px);
+            mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black, transparent 80%);
+        }
+
+        /* Bordure animée pour la carte centrale */
+        @keyframes borderFlow {
+            0% { border-image-source: linear-gradient(to right, #a855f7, #ec4899); }
+            50% { border-image-source: linear-gradient(to right, #ec4899, #3b82f6); }
+            100% { border-image-source: linear-gradient(to right, #a855f7, #ec4899); }
+        }
+
+        .crazy-border {
+            border: 2px solid;
+            border-image-slice: 1;
+            border-image-source: linear-gradient(to right, #a855f7, #ec4899);
+            animation: borderFlow 4s linear infinite;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(13, 5, 24, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        /* ----- Carrousel 3D (Optimisé Mobile First) ----- */
+        .perspective-container {
+            perspective: 1000px;
+        }
+
+        .carousel-card {
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+            cursor: pointer;
+            width: 85vw; /* Largeur adaptative mobile */
+            max-width: 380px; /* Max pour desktop */
+        }
+
+        /* Carte Active (Centre) */
+        .carousel-card[data-pos="center"] {
+            transform: translateZ(50px) scale(1);
+            z-index: 30;
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        /* Cartes inactives sur MOBILE (très resserrées pour éviter l'overflow) */
+        .carousel-card[data-pos="prev"] {
+            transform: translateX(-40%) rotateY(15deg) scale(0.85);
+            z-index: 10;
+            opacity: 0.3;
+            filter: blur(3px);
+        }
+
+        .carousel-card[data-pos="next"] {
+            transform: translateX(40%) rotateY(-15deg) scale(0.85);
+            z-index: 10;
+            opacity: 0.3;
+            filter: blur(3px);
+        }
+
+        /* Cartes inactives sur DESKTOP (plus espacées) */
+        @media (min-width: 768px) {
+            .carousel-card[data-pos="prev"] { transform: translateX(-90%) rotateY(25deg) scale(0.85); }
+            .carousel-card[data-pos="next"] { transform: translateX(90%) rotateY(-25deg) scale(0.85); }
+        }
+
+        /* Assombrissement du contenu des cartes inactives */
+        .carousel-card:not([data-pos="center"]) .card-inner {
+            border-color: #1f2937 !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+        .carousel-card:not([data-pos="center"]) .cta-btn {
+            background: #1f2937 !important;
+            color: #6b7280 !important;
+            pointer-events: none;
+        }
+
+        /* Transitions de vues */
+        .view-section {
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .view-hidden {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            transform: scale(0.95);
+        }
+        .view-visible {
+            opacity: 1;
+            pointer-events: auto;
+            position: relative;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+
+    <!-- Background Elements -->
+    <div class="fixed inset-0 cyber-grid z-0 pointer-events-none"></div>
+    <div class="fixed top-1/4 left-1/4 w-64 md:w-96 h-64 md:h-96 bg-purple-600/20 rounded-full blur-[100px] md:blur-[120px] animate-pulse-slow z-0 pointer-events-none"></div>
+    <div class="fixed bottom-1/4 right-1/4 w-64 md:w-96 h-64 md:h-96 bg-pink-600/10 rounded-full blur-[100px] md:blur-[120px] animate-pulse-slow z-0 pointer-events-none"></div>
+
+    <!-- Header Minimaliste & Centré -->
+    <header class="relative z-50 w-full py-6 px-4 flex justify-between items-center max-w-7xl mx-auto">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2 md:space-x-3 cursor-pointer" onclick="switchView('offres')">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center font-black text-white text-lg md:text-xl shadow-[0_0_20px_rgba(168,85,247,0.6)]">D+</div>
+            <span class="font-black tracking-tighter text-xl md:text-2xl uppercase">delthom<span class="text-purple-500">+</span></span>
+        </div>
+        
+        <!-- Bouton Accès Onboarding -->
+        <button onclick="switchView('onboarding')" class="flex items-center space-x-2 text-xs md:text-sm font-bold uppercase tracking-wider text-purple-300 hover:text-white transition-colors bg-purple-900/30 px-3 py-2 rounded-lg border border-purple-500/30 backdrop-blur-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            <span class="hidden md:inline">Espace Client</span>
+        </button>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL DES VUES -->
+    <div class="flex-grow flex relative z-10 w-full max-w-7xl mx-auto">
+
+        <!-- ========================================= -->
+        <!-- VUE 1 : OFFRES (CARROUSEL)                -->
+        <!-- ========================================= -->
+        <main id="view-offres" class="view-section view-visible w-full flex flex-col items-center justify-center py-4">
+            
+            <div class="text-center mb-8 md:mb-12 px-4 shrink-0">
+                <h1 class="text-3xl md:text-5xl font-black uppercase mb-2 md:mb-4 tracking-tight leading-none">
+                    Choisissez votre <br class="md:hidden" />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 neon-text-pink">Machine à devis</span>
+                </h1>
+                <p class="text-gray-400 uppercase tracking-widest text-[10px] md:text-sm font-medium">Propulsé par Kix • Région Var (83)</p>
+            </div>
+
+            <!-- Conteneur Carrousel centré -->
+            <div class="relative w-full h-[550px] md:h-[600px] flex items-center justify-center perspective-container shrink-0">
+                
+                <!-- Boutons de navigation (visibles sur Desktop) -->
+                <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-2 md:px-10 z-50 pointer-events-none hidden md:flex">
+                    <button onclick="moveCarousel('prev')" class="pointer-events-auto p-4 rounded-full glass border border-purple-500/50 hover:bg-purple-600 transition-all active:scale-90 shadow-xl text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <button onclick="moveCarousel('next')" class="pointer-events-auto p-4 rounded-full glass border border-purple-500/50 hover:bg-purple-600 transition-all active:scale-90 shadow-xl text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
+
+                <div id="carousel" class="relative w-full h-full flex items-center justify-center">
+                    
+                    <!-- CARTE 1: LA VITRINE PRO -->
+                    <div class="carousel-card absolute" data-index="0" data-pos="prev" onclick="setSlide(0)">
+                        <div class="card-inner glass rounded-[2rem] p-6 md:p-10 flex flex-col h-full min-h-[480px] border-2 border-purple-500 shadow-[0_0_40px_rgba(168,85,247,0.2)] bg-[#0a0212]">
+                            <div class="mb-4 md:mb-6">
+                                <span class="text-[10px] md:text-xs font-bold text-purple-400 tracking-[0.2em] uppercase">Pack 1 - Paiement Unique</span>
+                                <h3 class="text-2xl md:text-3xl font-black mt-1 md:mt-2 text-white">LA VITRINE PRO</h3>
+                                <p class="text-gray-400 text-xs md:text-sm mt-2">L'essentiel pour exister et rassurer.</p>
+                            </div>
+                            <div class="text-4xl md:text-5xl font-black mb-6 md:mb-8 neon-text text-white">500 € <span class="text-lg md:text-xl font-medium text-gray-500">HT</span></div>
+                            <ul class="space-y-3 md:space-y-4 flex-grow mb-6 text-left">
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Design Sur-Mesure</strong></span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Hébergement Haute Perf</strong></span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">SEO Local Inclus</strong></span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-purple-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Galerie Photo Avant/Après</strong></span>
+                                </li>
+                            </ul>
+                            <a href="https://checkout.revolut.com/pay/d0510f1e-dbfc-4b5a-8cc7-6db903668697" class="cta-btn mt-auto block w-full py-3 md:py-4 bg-white text-black font-black uppercase text-sm md:text-base tracking-wider rounded-xl hover:scale-105 transition-transform text-center shadow-lg">Régler le pack (500€)</a>
+                        </div>
+                    </div>
+
+                    <!-- CARTE 2: LA MACHINE IA -->
+                    <div class="carousel-card absolute" data-index="1" data-pos="center" onclick="setSlide(1)">
+                        <div class="card-inner glass rounded-[2rem] p-6 md:p-10 flex flex-col h-full min-h-[500px] crazy-border shadow-[0_0_60px_rgba(236,72,153,0.3)] bg-gradient-to-b from-[#1a052e] to-[#0a0212] relative overflow-hidden">
+                            <div class="absolute top-4 right-4 px-2 py-1 bg-pink-600 text-[9px] md:text-[10px] font-bold uppercase tracking-widest rounded-full animate-pulse text-white">Best-Seller</div>
+                            <div class="mb-4 md:mb-6">
+                                <span class="text-[10px] md:text-xs font-bold text-pink-400 tracking-[0.2em] uppercase">Pack 2 - Paiement Unique</span>
+                                <h3 class="text-2xl md:text-3xl font-black mt-1 md:mt-2 text-white">LA MACHINE IA</h3>
+                                <p class="text-gray-300 text-xs md:text-sm mt-1 md:mt-2 italic">Votre meilleur employé 24/7.</p>
+                            </div>
+                            <div class="text-4xl md:text-5xl font-black mb-6 md:mb-8 neon-text-pink text-white">950 € <span class="text-lg md:text-xl font-medium text-gray-400">HT</span></div>
+                            <ul class="space-y-3 md:space-y-4 flex-grow mb-6 text-left">
+                                <li class="flex items-start space-x-3 text-white text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-pink-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span class="font-bold underline decoration-pink-500 underline-offset-2">Tout le Pack Vitrine Inclus</span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-200 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-pink-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Agent IA :</strong> Qualifie les clients.</span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-200 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-pink-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Prise de RDV :</strong> Direct agenda.</span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-200 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-pink-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Relances SMS auto.</strong></span>
+                                </li>
+                            </ul>
+                            <a href="https://checkout.revolut.com/pay/730d307b-5f81-45bd-af2b-b5538352f404" class="cta-btn mt-auto block w-full py-3 md:py-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black uppercase text-sm md:text-base tracking-wider rounded-xl hover:scale-105 transition-transform text-center shadow-[0_0_20px_rgba(236,72,153,0.5)]">Régler le pack (950€)</a>
+                        </div>
+                    </div>
+
+                    <!-- CARTE 3: ADS -->
+                    <div class="carousel-card absolute" data-index="2" data-pos="next" onclick="setSlide(2)">
+                        <div class="card-inner glass rounded-[2rem] p-6 md:p-10 flex flex-col h-full min-h-[480px] border-2 border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.2)] bg-[#020617]">
+                            <div class="mb-4 md:mb-6">
+                                <span class="text-[10px] md:text-xs font-bold text-blue-400 tracking-[0.2em] uppercase">Option - Mensuel</span>
+                                <h3 class="text-2xl md:text-3xl font-black mt-1 md:mt-2 text-white">VISIBILITÉ ADS</h3>
+                                <p class="text-gray-400 text-xs md:text-sm mt-2">Le carburant pour exploser.</p>
+                            </div>
+                            <div class="text-4xl md:text-5xl font-black mb-6 md:mb-8 neon-text-blue text-white">750 € <span class="text-lg md:text-xl font-medium text-gray-500">HT / mo</span></div>
+                            <ul class="space-y-3 md:space-y-4 flex-grow mb-6 text-left">
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Google Ads Local (Top 1)</strong></span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Ciblage Chirurgical</strong></span>
+                                </li>
+                                <li class="flex items-start space-x-3 text-gray-300 text-xs md:text-sm">
+                                    <svg class="w-4 h-4 md:w-5 md:h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    <span><strong class="text-white">Gestion & Opti Mensuelle</strong></span>
+                                </li>
+                            </ul>
+                            <a href="#LIEN_PAIEMENT_ADS" class="cta-btn mt-auto block w-full py-3 md:py-4 bg-blue-600 text-white font-black uppercase text-sm md:text-base tracking-wider rounded-xl hover:scale-105 transition-transform text-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">Activer le Boost Ads</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- Indicateur de Swipe Mobile -->
+            <div class="mt-4 text-gray-500 text-xs uppercase tracking-widest flex items-center space-x-2 md:hidden">
+                <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(90deg);"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>Glisser pour voir</span>
+            </div>
+        </main>
+
+        <!-- ========================================= -->
+        <!-- VUE 2 : ONBOARDING CLIENT (Tunnel V2)     -->
+        <!-- ========================================= -->
+        <section id="view-onboarding" class="view-section view-hidden w-full flex flex-col px-4 py-6 md:py-12">
+            <div class="max-w-3xl mx-auto w-full relative">
+                
+                <!-- En-tête Onboarding & Barre de progression -->
+                <div class="flex items-center justify-between mb-6 border-b border-purple-500/20 pb-4">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black uppercase text-white mb-1">Espace <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Onboarding</span></h2>
+                        <p class="text-gray-400 text-[10px] md:text-xs uppercase tracking-widest">Initialisation de la machine</p>
+                    </div>
+                    <button onclick="switchView('offres')" class="p-2 md:p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors" title="Fermer">
+                        <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-white/5 h-2 rounded-full mb-8 overflow-hidden border border-white/10">
+                    <div id="onboard-progress" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[10%] transition-all duration-700 ease-out"></div>
+                </div>
+
+                <!-- CONTENEURS DES ÉTAPES -->
+
+                <!-- ÉTAPE 0 : Accueil & Choix -->
+                <div id="step-0" class="onboard-step">
+                    <h2 class="text-2xl md:text-3xl font-black uppercase text-white mb-6 text-center">Félicitations ! 🎉</h2>
+                    
+                    <div class="glass p-6 md:p-8 rounded-3xl border border-purple-500/30 mb-8 max-w-lg mx-auto text-center shadow-lg shadow-purple-900/20">
+                        <p class="text-sm md:text-base text-gray-300 leading-relaxed">
+                            Votre commande est bien validée. Puisque nous sommes en ligne, nous allons configurer la base de votre site tout de suite.<br><br>
+                            <strong class="text-white">Avez-vous déjà une adresse pour votre site internet ?</strong><br>
+                            <span class="text-xs text-gray-500 font-normal italic mt-1 inline-block">(ex: mon-entreprise.fr)</span>
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto">
+                        <button onclick="goToOnboardStep('1a')" class="p-6 glass rounded-2xl border-2 border-purple-500/30 hover:border-purple-500 hover:bg-purple-900/20 transition-all text-center group">
+                            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🌐</div>
+                            <h4 class="font-black text-white mb-1 uppercase tracking-wider">NON</h4>
+                            <p class="text-xs text-gray-400">Je dois créer mon adresse</p>
+                        </button>
+                        <button onclick="goToOnboardStep('1b')" class="p-6 glass rounded-2xl border-2 border-pink-500/30 hover:border-pink-500 hover:bg-pink-900/20 transition-all text-center group">
+                            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">✅</div>
+                            <h4 class="font-black text-white mb-1 uppercase tracking-wider">OUI</h4>
+                            <p class="text-xs text-gray-400">J'ai déjà une adresse existante</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 1A : Nouveau Domaine -->
+                <div id="step-1a" class="onboard-step hidden">
+                    <button onclick="goToOnboardStep('0')" class="text-xs font-bold uppercase tracking-widest text-purple-400 hover:text-white mb-6 flex items-center bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 w-fit"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg> Retour</button>
+                    <h2 class="text-2xl md:text-3xl font-black uppercase text-white mb-6">Création de votre adresse</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="glass p-5 md:p-6 rounded-2xl border border-purple-500/30 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                            <h4 class="font-bold text-white mb-3 flex items-center text-sm md:text-base"><span class="bg-gradient-to-br from-purple-500 to-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-3 shadow-lg">1</span> Acheter votre adresse</h4>
+                            <p class="text-xs md:text-sm text-gray-300 mb-4 pl-9">Pour être 100% propriétaire, achetez votre adresse à votre nom sur le fournisseur officiel OVH (env. 15€/an).</p>
+                            <a href="https://www.ovhcloud.com/fr/domains/" target="_blank" class="ml-9 inline-flex items-center px-4 py-2 bg-[#00185A] text-white text-xs font-bold uppercase rounded-lg hover:bg-[#002588] transition-colors border border-blue-500/30">
+                                Aller sur OVH <svg class="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </div>
+
+                        <div class="glass p-5 md:p-6 rounded-2xl border border-purple-500/30 relative overflow-hidden">
+                            <div class="absolute bottom-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-[30px] pointer-events-none"></div>
+                            <h4 class="font-bold text-white mb-3 flex items-center text-sm md:text-base"><span class="bg-gradient-to-br from-purple-500 to-pink-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs mr-3 shadow-lg">2</span> Faire le branchement</h4>
+                            <p class="text-xs md:text-sm text-gray-300 mb-4 pl-9">Ajoutez-moi en tant que "Contact Technique" sur OVH pour que je puisse relier votre site, <strong class="text-white">sans avoir besoin de votre mot de passe</strong>.</p>
+                            
+                            <div class="ml-9 bg-black/60 p-4 rounded-xl border border-white/10 mb-6 relative group">
+                                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Mon Identifiant OVH à copier :</p>
+                                <p class="text-lg font-mono font-bold text-pink-400 select-all cursor-pointer">KIX123-OVH</p>
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 group-hover:text-white transition-colors pointer-events-none">Sélect. pour copier</span>
+                            </div>
+                            
+                            <div class="ml-9">
+                                <label class="block text-[10px] md:text-xs font-bold text-purple-300 mb-2 uppercase tracking-wider">Quelle adresse avez-vous achetée ?</label>
+                                <input type="text" id="new-domain-input" placeholder="ex: mon-artisan-var.fr" class="w-full bg-black/50 border border-purple-500/50 rounded-xl px-4 py-3 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm mb-6 transition-all">
+                                
+                                <button onclick="goToOnboardStep('2')" class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-transform shadow-[0_0_20px_rgba(168,85,247,0.4)]">C'EST FAIT ✅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 1B : Domaine Existant -->
+                <div id="step-1b" class="onboard-step hidden">
+                    <button onclick="goToOnboardStep('0')" class="text-xs font-bold uppercase tracking-widest text-pink-400 hover:text-white mb-6 flex items-center bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 w-fit"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg> Retour</button>
+                    <h2 class="text-2xl md:text-3xl font-black uppercase text-white mb-6">Branchement du domaine</h2>
+                    
+                    <div class="glass p-6 md:p-8 rounded-3xl border border-pink-500/30 space-y-6">
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Quelle est votre adresse web actuelle ?</label>
+                            <input type="text" id="existing-domain-input" placeholder="ex: plombier-var.fr" class="w-full bg-black/50 border border-pink-500/50 rounded-xl px-4 py-4 text-white outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 text-sm transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Chez quel fournisseur l'avez-vous achetée ?</label>
+                            <div class="relative">
+                                <select id="domain-provider" onchange="updateProviderInstructions()" class="w-full bg-black/50 border border-pink-500/50 rounded-xl px-4 py-4 text-white outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 text-sm appearance-none transition-all cursor-pointer">
+                                    <option value="" class="text-gray-500">-- Sélectionnez un choix --</option>
+                                    <option value="ovh" class="text-black">OVH</option>
+                                    <option value="ionos" class="text-black">Ionos</option>
+                                    <option value="hostinger" class="text-black">Hostinger</option>
+                                    <option value="gandi" class="text-black">Gandi</option>
+                                    <option value="orange" class="text-black">Orange</option>
+                                    <option value="unknown" class="text-black">Je ne sais pas</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                    <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instructions Dynamiques -->
+                        <div id="provider-instructions" class="hidden bg-gradient-to-r from-pink-900/20 to-purple-900/20 p-5 rounded-xl border border-pink-500/30 mt-2 shadow-inner">
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-pink-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <p id="provider-text" class="text-xs md:text-sm text-gray-200 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <button onclick="goToOnboardStep('2')" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-transform mt-8 shadow-[0_0_20px_rgba(236,72,153,0.4)]">INFOS ENVOYÉES ✅</button>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 2 : La Matière Première (Questionnaire) -->
+                <div id="step-2" class="onboard-step hidden">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-6 gap-2">
+                        <h2 class="text-2xl md:text-3xl font-black uppercase text-white">La Matière Première</h2>
+                        <span class="text-[10px] uppercase tracking-widest font-bold bg-purple-900/50 text-purple-300 px-3 py-1.5 rounded-lg border border-purple-500/30 w-fit">Dernière étape</span>
+                    </div>
+                    
+                    <div class="glass p-6 md:p-8 rounded-3xl border border-purple-500/30 space-y-6">
+                        <p class="text-xs md:text-sm text-gray-300 mb-6 pb-6 border-b border-white/10">Ces informations vont me permettre de configurer votre Agent IA et de créer des textes ultra-vendeurs pour votre site.</p>
+                        
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Quels sont vos 3 services principaux ?</label>
+                            <input type="text" placeholder="ex: Dépannage urgence, Création SDB, Chauffage..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Sur quelles villes/rayons intervenez-vous ?</label>
+                            <input type="text" placeholder="ex: Toulon et 30km autour" class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Quelle est votre plus grande force par rapport aux concurrents ?</label>
+                            <input type="text" placeholder="ex: Devis sous 24h, 15 ans d'expérience, Intervention 7j/7..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Avez-vous des certifications ou garanties spécifiques ?</label>
+                            <input type="text" placeholder="ex: RGE, Qualibat, Garantie Décennale à jour..." class="w-full bg-black/50 border border-purple-500/30 rounded-xl px-4 py-3.5 text-white outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 text-sm transition-all">
+                        </div>
+
+                        <div class="pt-6 border-t border-white/10">
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-3 uppercase tracking-wider">Votre Logo <span class="text-gray-500 font-normal normal-case">(Optionnel)</span></label>
+                            <input type="file" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] md:text-xs font-bold text-gray-300 mb-3 uppercase tracking-wider">Photos de vos meilleurs chantiers <span class="text-gray-500 font-normal normal-case">(Optionnel, 3 à 5 max)</span></label>
+                            <input type="file" multiple accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer border border-dashed border-white/20 p-2 rounded-xl bg-black/30">
+                        </div>
+
+                        <button onclick="goToOnboardStep('3')" class="w-full py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-black uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-transform mt-8 shadow-[0_0_30px_rgba(59,130,246,0.3)]">VALIDER MON DOSSIER 📤</button>
+                    </div>
+                </div>
+
+                <!-- ÉTAPE 3 : Conclusion & Compte à rebours -->
+                <div id="step-3" class="onboard-step hidden text-center py-6 md:py-12">
+                    <div class="w-24 h-24 md:w-32 md:h-32 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/50 relative">
+                        <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping" style="animation-duration: 2s;"></div>
+                        <svg class="w-12 h-12 md:w-16 md:h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    
+                    <h2 class="text-3xl md:text-5xl font-black uppercase text-white mb-4 tracking-tight">C'est parfait !</h2>
+                    <p class="text-sm md:text-base text-gray-300 mb-10 max-w-lg mx-auto leading-relaxed">Votre dossier est complet et transmis. Mon équipe et la Machine IA sont au travail pour construire votre système de génération de devis.</p>
+
+                    <div class="glass p-8 md:p-10 rounded-3xl border border-purple-500/50 inline-block w-full max-w-md mb-12 shadow-[0_0_50px_rgba(168,85,247,0.3)] bg-gradient-to-b from-[#1a052e] to-black">
+                        <p class="text-[10px] md:text-xs uppercase tracking-[0.2em] text-purple-300 font-bold mb-6">Mise en ligne prévue dans maximum :</p>
+                        <div id="countdown" class="text-6xl md:text-7xl font-black text-white font-mono tracking-tighter neon-text">48:00:00</div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+                        <a href="https://wa.me/33600000000" target="_blank" class="w-full px-6 py-4 bg-[#25D366] text-white text-xs md:text-sm font-bold uppercase tracking-widest rounded-xl hover:bg-[#20b858] transition-colors shadow-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.128.552 4.195 1.6 6.008L.048 24l6.104-1.6c1.748.966 3.705 1.472 5.879 1.472 6.646 0 12.031-5.385 12.031-12.031C24.062 5.385 18.677 0 12.031 0zm0 21.916c-1.804 0-3.568-.484-5.116-1.404l-.368-.216-3.8.996.996-3.8-.236-.376A9.974 9.974 0 011.984 12.03c0-5.548 4.512-10.06 10.048-10.06 5.548 0 10.06 4.512 10.06 10.06s-4.512 10.06-10.06 10.06zM17.5 15.54c-.304-.152-1.8-.888-2.08-.992-.28-.104-.488-.152-.688.152s-.792.992-.968 1.192c-.176.2-.352.224-.656.072-1.728-.84-2.832-1.528-3.928-3.416-.112-.192-.016-.296.064-.44.136-.24.288-.344.432-.512.144-.168.192-.288.288-.48.096-.192.048-.36-.024-.512-.072-.152-.688-1.656-.944-2.264-.248-.592-.504-.512-.688-.52-.176-.008-.376-.008-.576-.008-.2 0-.528.072-.8.368s-1.04 1.016-1.04 2.472c0 1.456 1.064 2.864 1.216 3.064.152.2 2.08 3.176 5.04 4.456 2.032.88 2.76.744 3.288.624.816-.184 1.8-.736 2.056-1.448.256-.712.256-1.32.176-1.448-.072-.128-.272-.2-.576-.352z"/></svg>
+                            WhatsApp Léo
+                        </a>
+                        <button onclick="switchView('offres')" class="w-full px-6 py-4 bg-transparent text-gray-400 text-xs md:text-sm font-bold uppercase tracking-widest rounded-xl hover:text-white hover:bg-white/5 transition-colors border border-white/10">Retour site</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer Minimaliste -->
+    <footer class="relative z-20 py-4 md:py-6 text-center border-t border-white/5 mt-auto bg-[#05000a]">
+        <p class="text-[10px] md:text-xs text-gray-500 uppercase tracking-widest">© 2024 delthom+ • Kix • Tous droits réservés</p>
+        <p class="text-[8px] md:text-[10px] text-gray-700 mt-1 md:mt-2">* Le développement démarre à réception du paiement intégral via lien sécurisé.</p>
+    </footer>
+
+    <!-- LOGIQUE DE L'APPLICATION -->
+    <script>
+        /* --- GESTION DU CARROUSEL --- */
+        let activeIndex = 1;
+        const totalCards = 3;
+
+        function updateCarousel() {
+            const cards = document.querySelectorAll('.carousel-card');
+            cards.forEach((card) => {
+                const index = parseInt(card.getAttribute('data-index'));
+                if (index === activeIndex) {
+                    card.setAttribute('data-pos', 'center');
+                } else if (index === (activeIndex - 1 + totalCards) % totalCards) {
+                    card.setAttribute('data-pos', 'prev');
+                } else {
+                    card.setAttribute('data-pos', 'next');
+                }
+            });
+        }
+
+        function moveCarousel(direction) {
+            if (direction === 'next') activeIndex = (activeIndex + 1) % totalCards;
+            else activeIndex = (activeIndex - 1 + totalCards) % totalCards;
+            updateCarousel();
+        }
+
+        function setSlide(index) {
+            if (index !== activeIndex) {
+                activeIndex = index;
+                updateCarousel();
+            }
+        }
+
+        /* --- GESTION DU SWIPE MOBILE --- */
+        let touchstartX = 0;
+        let touchendX = 0;
+        const carousel = document.getElementById('carousel');
+
+        // Ajout d'une vérification pour éviter l'erreur si l'élément 'carousel' n'est pas prêt.
+        if (carousel) {
+            carousel.addEventListener('touchstart', e => {
+                touchstartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+
+            carousel.addEventListener('touchend', e => {
+                touchendX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+        }
+
+        function handleSwipe() {
+            // Seuil de swipe (50px)
+            if (touchendX < touchstartX - 50) moveCarousel('next');
+            if (touchendX > touchstartX + 50) moveCarousel('prev');
+        }
+
+        /* --- GESTION DES VUES (NAVIGATION) --- */
+        function switchView(viewName) {
+            const viewOffres = document.getElementById('view-offres');
+            const viewOnboarding = document.getElementById('view-onboarding');
+
+            if (viewName === 'onboarding') {
+                viewOffres.classList.remove('view-visible');
+                viewOffres.classList.add('view-hidden');
+                
+                // Reset onboarding to step 0
+                goToOnboardStep('0');
+
+                // Petit délai pour l'animation
+                setTimeout(() => {
+                    viewOnboarding.classList.remove('view-hidden');
+                    viewOnboarding.classList.add('view-visible');
+                    window.scrollTo(0,0);
+                }, 200);
+            } else {
+                viewOnboarding.classList.remove('view-visible');
+                viewOnboarding.classList.add('view-hidden');
+                
+                setTimeout(() => {
+                    viewOffres.classList.remove('view-hidden');
+                    viewOffres.classList.add('view-visible');
+                    updateCarousel(); // Force le recalcul visuel si besoin
+                    window.scrollTo(0,0);
+                }, 200);
+            }
+        }
+
+        /* --- LOGIQUE ONBOARDING V2 --- */
+        function goToOnboardStep(stepId) {
+            // Cacher toutes les étapes
+            document.querySelectorAll('.onboard-step').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Afficher l'étape cible
+            document.getElementById('step-' + stepId).classList.remove('hidden');
+            
+            // Scroll en haut en douceur
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Mise à jour de la barre de progression
+            const progressBar = document.getElementById('onboard-progress');
+            if(stepId === '0') progressBar.style.width = '10%';
+            else if(stepId === '1a' || stepId === '1b') progressBar.style.width = '40%';
+            else if(stepId === '2') progressBar.style.width = '70%';
+            else if(stepId === '3') {
+                progressBar.style.width = '100%';
+                startCountdown();
+                
+                // Ici tu pourras intégrer ton Webhook (Make/Zapier) pour envoyer les données au CRM.
+                // alert('Webhook: Envoi des données en cours...'); 
+            }
+        }
+
+        function updateProviderInstructions() {
+            const provider = document.getElementById('domain-provider').value;
+            const container = document.getElementById('provider-instructions');
+            const textEl = document.getElementById('provider-text');
+            
+            if(!provider) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            
+            if(provider === 'ovh') {
+                textEl.innerHTML = "Ajoutez-moi en tant que <strong>Contact Technique</strong> dans votre espace OVH. Mon identifiant à copier : <br/><strong class='text-white select-all font-mono mt-1 inline-block text-lg bg-black/50 px-2 py-1 rounded'>KIX123-OVH</strong>";
+            } else if (provider === 'unknown') {
+                textEl.innerHTML = "Pas de panique ! L'équipe va analyser votre adresse et vous contactera sur WhatsApp pour vous guider en moins de 2 minutes.";
+            } else {
+                const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+                textEl.innerHTML = `Pour lier votre nouveau site à cette adresse, j'ai besoin d'un accès administrateur temporaire sur <strong>${providerName}</strong>. Veuillez m'inviter par email à l'adresse :<br/><strong class='text-white select-all font-mono mt-1 inline-block text-base bg-black/50 px-2 py-1 rounded'>contact@delthom.fr</strong>`;
+            }
+        }
+
+        let countdownInterval;
+        function startCountdown() {
+            clearInterval(countdownInterval);
+            // 48 heures à partir de maintenant
+            let targetTime = new Date().getTime() + 48 * 60 * 60 * 1000;
+            const display = document.getElementById('countdown');
+            
+            countdownInterval = setInterval(() => {
+                let now = new Date().getTime();
+                let distance = targetTime - now;
+                
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    display.innerHTML = "00:00:00";
+                    return;
+                }
+                
+                let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)) + Math.floor(distance / (1000 * 60 * 60 * 24)) * 24;
+                let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Formatage avec zéros initiaux
+                hours = String(hours).padStart(2, '0');
+                minutes = String(minutes).padStart(2, '0');
+                seconds = String(seconds).padStart(2, '0');
+                
+                display.innerHTML = `${hours}:${minutes}:${seconds}`;
+            }, 1000);
+            
+            // Affichage immédiat pour éviter le lag d'1s
+            display.innerHTML = "48:00:00";
+        }
+
+        // Initialisation du Carrousel
+        updateCarousel();
+    </script>
+</body>
+</html>
